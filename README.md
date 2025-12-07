@@ -1,6 +1,6 @@
 # @franlol/opencode-md-table-formatter
 
-Markdown table formatter plugin for OpenCode with concealment mode support.
+Markdown table formatter plugin for Opencode with concealment mode support.
 
 ## Features
 
@@ -23,7 +23,7 @@ Add the plugin to your `.opencode/opencode.jsonc`:
 }
 ```
 
-Restart OpenCode. Tables in AI responses will now be automatically formatted!
+Restart Opencode. Tables in AI responses will now be automatically formatted!
 
 ## Example
 
@@ -58,7 +58,7 @@ The plugin handles complex edge cases with concealment mode enabled:
 
 ## How It Works
 
-This plugin uses OpenCode's `text.complete` hook to format markdown tables after the AI finishes generating text. It intelligently strips markdown symbols (for width calculation) while preserving symbols inside inline code blocks, ensuring tables align correctly even with OpenCode's concealment mode enabled (the default setting).
+This plugin uses Opencode's `text.complete` hook to format markdown tables after the AI finishes generating text. It intelligently strips markdown symbols (for width calculation) while preserving symbols inside inline code blocks, ensuring tables align correctly ONLY with Opencode's concealment mode enabled (the default setting).
 
 The plugin uses a multi-pass regex algorithm to handle nested markdown (like `**bold with `code` inside**`) and caches width calculations for performance.
 
@@ -67,12 +67,9 @@ The plugin uses a multi-pass regex algorithm to handle nested markdown (like `**
 **Tables not formatting?**
 
 - Ensure the plugin is listed in your `.opencode/opencode.jsonc` config
-- Restart OpenCode after adding the plugin
+- Restart Opencode after adding the plugin
 - Check that tables have a separator row (`|---|---|`)
 
-**Excessive spacing in columns?**
-
-- This is fixed in v0.1.0! The plugin now preserves markdown inside inline code correctly.
 
 **Invalid table structure comment?**
 
@@ -82,7 +79,7 @@ The plugin uses a multi-pass regex algorithm to handle nested markdown (like `**
 
 ## Requirements
 
-- OpenCode CLI
+- Opencode CLI
 - Node.js >= 18.0.0 or Bun runtime
 - `@opencode-ai/plugin` >= 0.13.7
 
@@ -92,6 +89,6 @@ MIT © franlol
 
 ## Links
 
-- [GitHub Repository](https://github.com/franlol/opencode-mdtf)
-- [npm Package](https://www.npmjs.com/package/@franlol/opencode-mdtf)
-- [Report Issues](https://github.com/franlol/opencode-mdtf/issues)
+- [GitHub Repository](https://github.com/franlol/opencode-md-table-formatter)
+- [npm Package](https://www.npmjs.com/package/@franlol/opencode-md-table-formatter)
+- [Report Issues](https://github.com/franlol/opencode-md-table-formatter/issues)
