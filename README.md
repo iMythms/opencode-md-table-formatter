@@ -12,6 +12,27 @@ Add the plugin to your `.opencode/opencode.jsonc`:
 }
 ```
 
+## Example
+
+<table>
+  <tr>
+    <th style="text-align:center;">Original</th>
+    <th style="text-align:center;">Formatted</th>
+  </tr>
+  <tr>
+    <td>
+      <img src="https://github.com/user-attachments/assets/df71e950-c15d-4a10-8e08-fdd9b0216ba0"
+           alt="Screenshot 1"
+           style="height:250px; object-fit:cover;">
+    </td>
+    <td>
+      <img src="https://github.com/user-attachments/assets/c6f253e0-350f-487e-8da7-c8c6e8b2cb93"
+           alt="Screenshot 2"
+           style="height:250px; object-fit:cover;">
+    </td>
+  </tr>
+</table>
+
 ## Features
 
 - **Automatic table formatting** - Formats markdown tables after AI text completion
@@ -23,31 +44,6 @@ Add the plugin to your `.opencode/opencode.jsonc`:
 - **Silent operation** - No console logs, errors don't interrupt workflow
 - **Validation feedback** - Invalid tables get helpful error comments
 
-Restart Opencode. Tables in AI responses will now be automatically formatted!
-
-## Example
-
-The plugin handles complex edge cases with concealment mode enabled:
-
-**Input** (unformatted table with nested markdown):
-
-```
-| Feature | Description | Status |
-|---|---|
-| **Bold text** | Has *italic* content | ✅ Done |
-| `Code` | With `**bold**` inside | ⏳ Progress |
-| Unicode | Greek α β γ | 💡 Idea |
-```
-
-**Output** (automatically formatted):
-
-```
-| Feature       | Description            | Status      |
-| ------------- | ---------------------- | ----------- |
-| **Bold text** | Has *italic* content   | ✅ Done     |
-| `Code`        | With `**bold**` inside | ⏳ Progress |
-| Unicode       | Greek α β γ            | 💡 Idea     |
-```
 
 **Key behaviors:**
 
@@ -79,9 +75,7 @@ The plugin uses a multi-pass regex algorithm to handle nested markdown (like `**
 
 ## Requirements
 
-- Opencode CLI
-- Node.js >= 18.0.0 or Bun runtime
-- `@opencode-ai/plugin` >= 0.13.7
+- Opencode >= 1.0.137
 
 ## License
 
