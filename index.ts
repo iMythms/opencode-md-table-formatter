@@ -22,7 +22,7 @@ export const FormatTables: Plugin = async () => {
   } as Hooks
 }
 
-function formatMarkdownTables(text: string): string {
+export function formatMarkdownTables(text: string): string {
   const lines = text.split("\n")
   const result: string[] = []
   let i = 0
@@ -180,9 +180,14 @@ function getStringWidth(text: string): number {
     previousText = visualText
     visualText = visualText
       .replace(/\*\*\*(.+?)\*\*\*/g, "$1") // ***bold+italic*** -> text
+      .replace(/___(.+?)___/g, "$1") // ___bold+italic___ -> text
       .replace(/\*\*(.+?)\*\*/g, "$1") // **bold** -> bold
+      .replace(/__(.+?)__/g, "$1") // __bold__ -> bold
       .replace(/\*(.+?)\*/g, "$1") // *italic* -> italic
+      .replace(/_(.+?)_/g, "$1") // _italic_ -> italic
       .replace(/~~(.+?)~~/g, "$1") // ~~strike~~ -> strike
+      .replace(/~(.+?)~/g, "$1") // ~subscript~ -> subscript
+      .replace(/\^(.+?)\^/g, "$1") // ^superscript^ -> superscript
       .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, "$1") // ![alt](url) -> alt (OpenTUI shows only alt text)
       .replace(/\[([^\]]+)\]\(([^)]+)\)/g, "$1 ($2)") // [text](url) -> text (url)
   }
