@@ -8,7 +8,7 @@ Add the plugin to your `.opencode/opencode.jsonc`:
 
 ```jsonc
 {
-  "plugin": ["@franlol/opencode-md-table-formatter@0.0.3"],
+  "plugin": ["@franlol/opencode-md-table-formatter@latest"],
 }
 ```
 
