@@ -12,6 +12,8 @@ export const FormatTables: Plugin = async () => {
       input: { sessionID: string; messageID: string; partID: string },
       output: { text: string },
     ) => {
+      if (typeof output.text !== "string") return;
+      
       try {
         output.text = formatMarkdownTables(output.text)
       } catch (error) {
