@@ -30,7 +30,7 @@
     "README.md"
   ],
   "scripts": {
-    "test": "bun test"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "peerDependencies": {
     "@opencode-ai/plugin": ">=0.13.7"
