@@ -21,11 +21,11 @@ Standard markdown tables are automatically transformed into box-drawing bordered
 **Before (markdown input):**
 
 ```
-| Name            | Age | Grade |
-| --------------- | --- | ----- |
-| Emma Johnson    | 14  | 9th   |
-| Liam Smith      | 15  | 10th  |
-| Olivia Williams | 16  | 11th  |
+| Name | Age | Grade |
+| - | - | - |
+| Emma Johnson | 14 | 9th |
+| Liam Smith | 15 | 10th |
+| Olivia Williams | 16 | 11th |
 ```
 
 **After (formatted output):**
@@ -88,10 +88,10 @@ The plugin uses a multi-pass regex algorithm to handle nested markdown (like `**
 
 ## License
 
-MIT - see [LICENSE](./LICENSE) for details.
+- MIT - see [LICENSE](./LICENSE) for details.
 
-Original work: Copyright (c) 2025 [franlol](https://github.com/franlol)
-Modifications: Copyright (c) 2026 [Maitham Jasim](https://github.com/iMythms)
+- Original work: Copyright (c) 2025 [franlol](https://github.com/franlol)
+- Modifications: Copyright (c) 2026 [Maitham Jasim](https://github.com/iMythms)
 
 ## Links
 
