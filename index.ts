@@ -43,9 +43,25 @@ function formatMarkdownTables(text: string): string {
   const lines = text.split("\n")
   const result: string[] = []
   let i = 0
+  let insideCodeFence = false
 
   while (i < lines.length) {
     const line = lines[i]
+
+    // Track code fence boundaries (``` or ~~~)
+    if (/^\s*(`{3,}|~{3,})/.test(line)) {
+      insideCodeFence = !insideCodeFence
+      result.push(line)
+      i++
+      continue
+    }
+
+    // Skip all content inside code fences
+    if (insideCodeFence) {
+      result.push(line)
+      i++
+      continue
+    }
 
     // Detect and skip complete box-drawing tables (┌...│...└ blocks)
     if (isBoxDrawingBorderLine(line)) {
@@ -256,9 +272,37 @@ function calculateDisplayWidth(text: string): number {
 }
 
 function getStringWidth(text: string): number {
-  // Use raw text width for accurate border alignment
-  // This ensures tables look correct regardless of concealment mode
-  return Bun.stringWidth(text)
+  // Strip markdown symbols for concealment mode
+  // OpenCode's TUI hides **, *, ~~, ` visually but preserves content inside `code`
+
+  // Step 1: Extract and protect inline code content
+  const codeBlocks: string[] = []
+  let textWithPlaceholders = text.replace(/`(.+?)`/g, (match, content) => {
+    codeBlocks.push(content)
+    return `\x00CODE${codeBlocks.length - 1}\x00`
+  })
+
+  // Step 2: Strip markdown from non-code parts (multi-pass for nested)
+  let visualText = textWithPlaceholders
+  let previousText = ""
+
+  while (visualText !== previousText) {
+    previousText = visualText
+    visualText = visualText
+      .replace(/\*\*\*(.+?)\*\*\*/g, "$1") // ***bold+italic***
+      .replace(/\*\*(.+?)\*\*/g, "$1")     // **bold**
+      .replace(/\*(.+?)\*/g, "$1")         // *italic*
+      .replace(/~~(.+?)~~/g, "$1")         // ~~strikethrough~~
+      .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, "$1")        // ![alt](url) -> alt
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, "$1 ($2)")    // [text](url) -> text (url)
+  }
+
+  // Step 3: Restore code content (markdown inside backticks is literal)
+  visualText = visualText.replace(/\x00CODE(\d+)\x00/g, (match, index) => {
+    return codeBlocks[parseInt(index)]
+  })
+
+  return Bun.stringWidth(visualText)
 }
 
 function padCell(text: string, width: number, align: "left" | "center" | "right"): string {
