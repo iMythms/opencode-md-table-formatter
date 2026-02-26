@@ -6,6 +6,21 @@ declare const Bun: any
 const widthCache = new Map<string, number>()
 let cacheOperationCount = 0
 
+// Box-drawing characters for table borders
+const BOX = {
+  topLeft: "┌",
+  topRight: "┐",
+  topTee: "┬",
+  bottomLeft: "└",
+  bottomRight: "┘",
+  bottomTee: "┴",
+  midLeft: "├",
+  midRight: "┤",
+  midCross: "┼",
+  horizontal: "─",
+  vertical: "│",
+}
+
 export const FormatTables: Plugin = async () => {
   return {
     "experimental.text.complete": async (
@@ -32,6 +47,19 @@ function formatMarkdownTables(text: string): string {
   while (i < lines.length) {
     const line = lines[i]
 
+    // Detect and skip complete box-drawing tables (┌...│...└ blocks)
+    if (isBoxDrawingBorderLine(line)) {
+      // Collect the entire box-drawing block
+      const blockStart = i
+      result.push(line)
+      i++
+      while (i < lines.length && (isBoxDrawingBorderLine(lines[i]) || isBoxDrawingDataLine(lines[i]))) {
+        result.push(lines[i])
+        i++
+      }
+      continue
+    }
+
     if (isTableRow(line)) {
       const tableLines: string[] = [line]
       i++
@@ -57,15 +85,55 @@ function formatMarkdownTables(text: string): string {
   return result.join("\n")
 }
 
+// Detect box-drawing border lines: ┌───┬───┐, ├───┼───┤, └───┴───┘
+function isBoxDrawingBorderLine(line: string): boolean {
+  const trimmed = line.trim()
+  return (
+    trimmed.startsWith("┌") ||
+    trimmed.startsWith("├") ||
+    trimmed.startsWith("└")
+  )
+}
+
+// Detect box-drawing data lines: │ cell │ cell │
+// Only matches lines using ONLY │ (no |), indicating they are part of
+// a complete box-drawing table, not AI-mixed markdown
+function isBoxDrawingDataLine(line: string): boolean {
+  const trimmed = line.trim()
+  return trimmed.startsWith("│") && trimmed.endsWith("│") && !trimmed.includes("|")
+}
+
+// Strip box-drawing characters that the AI might embed inside markdown pipe cells
+// e.g. the AI sometimes outputs: | Bold | text │ ✓ │ |
+// We need to clean out the stray │ ─ ┌ ┐ └ ┘ ├ ┤ ┬ ┴ ┼ characters
+function sanitizeCell(cell: string): string {
+  return cell.replace(/[│┌┐└┘├┤┬┴┼─]/g, "").trim()
+}
+
+// Normalize a table line by replacing box-drawing │ with |
+// then collapsing any resulting double-pipes (e.g. "| text │ |" → "| text | |" → "| text |")
+function normalizeTableLine(line: string): string {
+  // Replace │ with |
+  let normalized = line.replace(/│/g, "|")
+  // Collapse sequences like "| |" (pipe-space-pipe with no content) at boundaries
+  // and consecutive pipes "||" into single "|"
+  normalized = normalized.replace(/\|\s*\|/g, "|")
+  // Ensure it still starts and ends with |
+  normalized = normalized.trim()
+  return normalized
+}
+
 function isTableRow(line: string): boolean {
   const trimmed = line.trim()
-  return trimmed.startsWith("|") && trimmed.endsWith("|") && trimmed.split("|").length > 2
+  // Normalize box-drawing │ to | for AI-mixed output
+  const normalized = normalizeTableLine(trimmed)
+  return normalized.startsWith("|") && normalized.endsWith("|") && normalized.split("|").length > 2
 }
 
 function isSeparatorRow(line: string): boolean {
-  const trimmed = line.trim()
-  if (!trimmed.startsWith("|") || !trimmed.endsWith("|")) return false
-  const cells = trimmed.split("|").slice(1, -1)
+  const normalized = normalizeTableLine(line.trim())
+  if (!normalized.startsWith("|") || !normalized.endsWith("|")) return false
+  const cells = normalized.split("|").slice(1, -1)
   return cells.length > 0 && cells.every((cell) => /^\s*:?-+:?\s*$/.test(cell))
 }
 
@@ -73,7 +141,7 @@ function isValidTable(lines: string[]): boolean {
   if (lines.length < 2) return false
 
   const rows = lines.map((line) =>
-    line
+    normalizeTableLine(line)
       .split("|")
       .slice(1, -1)
       .map((cell) => cell.trim()),
@@ -96,10 +164,10 @@ function formatTable(lines: string[]): string[] {
   }
 
   const rows = lines.map((line) =>
-    line
+    normalizeTableLine(line)
       .split("|")
       .slice(1, -1)
-      .map((cell) => cell.trim()),
+      .map((cell) => sanitizeCell(cell.trim())),
   )
 
   if (rows.length === 0) return lines
@@ -124,20 +192,47 @@ function formatTable(lines: string[]): string[] {
     }
   }
 
-  return rows.map((row, rowIndex) => {
+  // Build the formatted table with box-drawing characters
+  const result: string[] = []
+
+  // Top border: ┌─────┬─────┐
+  result.push(buildBorderRow(colWidths, BOX.topLeft, BOX.topTee, BOX.topRight))
+
+  // Filter out separator rows — only render data rows
+  const dataRows = rows.filter((_, idx) => !separatorIndices.has(idx))
+
+  for (let i = 0; i < dataRows.length; i++) {
+    const row = dataRows[i]
+
+    // Data row: │ cell │ cell │
     const cells: string[] = []
     for (let col = 0; col < colCount; col++) {
       const cell = row[col] ?? ""
       const align = colAlignments[col]
-
-      if (separatorIndices.has(rowIndex)) {
-        cells.push(formatSeparatorCell(colWidths[col], align))
-      } else {
-        cells.push(padCell(cell, colWidths[col], align))
-      }
+      cells.push(padCell(cell, colWidths[col], align))
     }
-    return "| " + cells.join(" | ") + " |"
-  })
+    result.push(BOX.vertical + " " + cells.join(" " + BOX.vertical + " ") + " " + BOX.vertical)
+
+    // Mid border between rows: ├─────┼─────┤ (not after the last row)
+    if (i < dataRows.length - 1) {
+      result.push(buildBorderRow(colWidths, BOX.midLeft, BOX.midCross, BOX.midRight))
+    }
+  }
+
+  // Bottom border: └─────┴─────┘
+  result.push(buildBorderRow(colWidths, BOX.bottomLeft, BOX.bottomTee, BOX.bottomRight))
+
+  return result
+}
+
+function buildBorderRow(
+  colWidths: number[],
+  left: string,
+  mid: string,
+  right: string,
+): string {
+  const segments = colWidths.map((w) => BOX.horizontal.repeat(w + 2))
+  return left + segments.join(mid) + right
 }
 
 function getAlignment(delimiterCell: string): "left" | "center" | "right" {
@@ -161,40 +256,9 @@ function calculateDisplayWidth(text: string): number {
 }
 
 function getStringWidth(text: string): number {
-  // Strip markdown symbols for concealment mode
-  // Users with concealment ON don't see **, *, ~~, ` but DO see markdown inside `code`
-
-  // CRITICAL: Content inside backticks should PRESERVE inner markdown symbols
-  // because concealment treats them as literal text, not markdown
-
-  // Step 1: Extract and protect inline code content
-  const codeBlocks: string[] = []
-  let textWithPlaceholders = text.replace(/`(.+?)`/g, (match, content) => {
-    codeBlocks.push(content)
-    return `\x00CODE${codeBlocks.length - 1}\x00`
-  })
-
-  // Step 2: Strip markdown from non-code parts
-  let visualText = textWithPlaceholders
-  let previousText = ""
-
-  while (visualText !== previousText) {
-    previousText = visualText
-    visualText = visualText
-      .replace(/\*\*\*(.+?)\*\*\*/g, "$1") // ***bold+italic*** -> text
-      .replace(/\*\*(.+?)\*\*/g, "$1") // **bold** -> bold
-      .replace(/\*(.+?)\*/g, "$1") // *italic* -> italic
-      .replace(/~~(.+?)~~/g, "$1") // ~~strike~~ -> strike
-      .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, "$1") // ![alt](url) -> alt (OpenTUI shows only alt text)
-      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, "$1 ($2)") // [text](url) -> text (url)
-  }
-
-  // Step 3: Restore code content (with its original markdown preserved)
-  visualText = visualText.replace(/\x00CODE(\d+)\x00/g, (match, index) => {
-    return codeBlocks[parseInt(index)]
-  })
-
-  return Bun.stringWidth(visualText)
+  // Use raw text width for accurate border alignment
+  // This ensures tables look correct regardless of concealment mode
+  return Bun.stringWidth(text)
 }
 
 function padCell(text: string, width: number, align: "left" | "center" | "right"): string {
@@ -210,12 +274,6 @@ function padCell(text: string, width: number, align: "left" | "center" | "right"
   } else {
     return text + " ".repeat(totalPadding)
   }
-}
-
-function formatSeparatorCell(width: number, align: "left" | "center" | "right"): string {
-  if (align === "center") return ":" + "-".repeat(Math.max(1, width - 2)) + ":"
-  if (align === "right") return "-".repeat(Math.max(1, width - 1)) + ":"
-  return "-".repeat(width)
 }
 
 function incrementOperationCount() {

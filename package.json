@@ -1,7 +1,7 @@
 {
-  "name": "@franlol/opencode-md-table-formatter",
-  "version": "0.0.6",
-  "description": "Markdown table formatter plugin for OpenCode with concealment mode support",
+  "name": "@imythms/opencode-md-table-formatter",
+  "version": "1.0.0",
+  "description": "Markdown table formatter plugin for OpenCode with box-drawing borders and concealment mode support",
   "keywords": [
     "opencode",
     "plugin",
@@ -10,18 +10,20 @@
     "formatter",
     "concealment",
     "alignment",
-    "text-formatting"
+    "text-formatting",
+    "box-drawing",
+    "unicode-borders"
   ],
-  "homepage": "https://github.com/franlol/opencode-md-table-formatter#readme",
+  "homepage": "https://github.com/iMythms/opencode-md-table-formatter#readme",
   "bugs": {
-    "url": "https://github.com/franlol/opencode-md-table-formatter/issues"
+    "url": "https://github.com/iMythms/opencode-md-table-formatter/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/franlol/opencode-md-table-formatter.git"
+    "url": "git+https://github.com/iMythms/opencode-md-table-formatter.git"
   },
   "license": "MIT",
-  "author": "franlol",
+  "author": "Maitham Jasim",
   "type": "module",
   "main": "index.ts",
   "files": [
@@ -37,5 +39,8 @@
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.9"
   }
 }

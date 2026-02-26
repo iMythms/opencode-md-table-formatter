@@ -1,6 +1,8 @@
-# @franlol/opencode-md-table-formatter
+# @imythms/opencode-md-table-formatter
 
-Markdown table formatter plugin for Opencode with concealment mode support.
+Markdown table formatter plugin for OpenCode with box-drawing borders and concealment mode support.
+
+> Forked from [@franlol/opencode-md-table-formatter](https://github.com/franlol/opencode-md-table-formatter) by [franlol](https://github.com/franlol). Original work licensed under MIT.
 
 ## Usage
 
@@ -8,33 +10,42 @@ Add the plugin to your `.opencode/opencode.jsonc`:
 
 ```jsonc
 {
-  "plugin": ["@franlol/opencode-md-table-formatter@latest"],
+  "plugin": ["@imythms/opencode-md-table-formatter@latest"],
 }
 ```
 
 ## Example
 
-<table>
-  <tr>
-    <th style="text-align:center;">Original</th>
-    <th style="text-align:center;">Formatted</th>
-  </tr>
-  <tr>
-    <td>
-      <img src="https://github.com/user-attachments/assets/df71e950-c15d-4a10-8e08-fdd9b0216ba0"
-           alt="Screenshot 1"
-           style="height:250px; object-fit:cover;">
-    </td>
-    <td>
-      <img src="https://github.com/user-attachments/assets/c6f253e0-350f-487e-8da7-c8c6e8b2cb93"
-           alt="Screenshot 2"
-           style="height:250px; object-fit:cover;">
-    </td>
-  </tr>
-</table>
+Standard markdown tables are automatically transformed into box-drawing bordered tables:
+
+**Before (markdown input):**
+
+```
+| Name            | Age | Grade |
+| --------------- | --- | ----- |
+| Emma Johnson    | 14  | 9th   |
+| Liam Smith      | 15  | 10th  |
+| Olivia Williams | 16  | 11th  |
+```
+
+**After (formatted output):**
+
+```
+┌─────────────────┬─────┬───────┐
+│ Name            │ Age │ Grade │
+├─────────────────┼─────┼───────┤
+│ Emma Johnson    │ 14  │ 9th   │
+├─────────────────┼─────┼───────┤
+│ Liam Smith      │ 15  │ 10th  │
+├─────────────────┼─────┼───────┤
+│ Olivia Williams │ 16  │ 11th  │
+└─────────────────┴─────┴───────┘
+```
 
 ## Features
 
+- **Box-drawing borders** - Tables rendered with Unicode box-drawing characters (`┌ ┐ └ ┘ ├ ┤ ┬ ┴ ┼ │ ─`)
+- **Row separators** - Horizontal borders between every row for clear visual separation
 - **Automatic table formatting** - Formats markdown tables after AI text completion
 - **Concealment mode compatible** - Correctly calculates column widths when markdown symbols are hidden
 - **Alignment support** - Left (`:---`), center (`:---:`), and right (`---:`) text alignment
@@ -44,28 +55,26 @@ Add the plugin to your `.opencode/opencode.jsonc`:
 - **Silent operation** - No console logs, errors don't interrupt workflow
 - **Validation feedback** - Invalid tables get helpful error comments
 
-
 **Key behaviors:**
 
 - Bold/italic symbols outside code are hidden by concealment but width calculated correctly
 - `**bold**` inside backticks shows as literal text with proper spacing
 - Emojis and unicode characters align properly
-- Columns have consistent spacing
+- Columns have consistent spacing with proper box-drawing borders
 
 ## How It Works
 
-This plugin uses Opencode's `experimental.text.complete` hook to format markdown tables after the AI finishes generating text. It intelligently strips markdown symbols (for width calculation) while preserving symbols inside inline code blocks, ensuring tables align correctly ONLY with Opencode's concealment mode enabled (the default setting).
+This plugin uses OpenCode's `experimental.text.complete` hook to format markdown tables after the AI finishes generating text. It intelligently strips markdown symbols (for width calculation) while preserving symbols inside inline code blocks, ensuring tables align correctly ONLY with OpenCode's concealment mode enabled (the default setting).
 
-The plugin uses a multi-pass regex algorithm to handle nested markdown (like `**bold with `code` inside**`) and caches width calculations for performance.
+The plugin uses a multi-pass regex algorithm to handle nested markdown (like `**bold with `code` inside**`) and caches width calculations for performance. Table borders are rendered using Unicode box-drawing characters for a clean, professional appearance.
 
 ## Troubleshooting
 
 **Tables not formatting?**
 
 - Ensure the plugin is listed in your `.opencode/opencode.jsonc` config
-- Restart Opencode after adding the plugin
+- Restart OpenCode after adding the plugin
 - Check that tables have a separator row (`|---|---|`)
-
 
 **Invalid table structure comment?**
 
@@ -75,14 +84,18 @@ The plugin uses a multi-pass regex algorithm to handle nested markdown (like `**
 
 ## Requirements
 
-- Opencode >= 1.0.137
+- OpenCode >= 1.0.137
 
 ## License
 
-MIT © franlol
+MIT - see [LICENSE](./LICENSE) for details.
+
+Original work: Copyright (c) 2025 [franlol](https://github.com/franlol)
+Modifications: Copyright (c) 2026 [Maitham Jasim](https://github.com/iMythms)
 
 ## Links
 
-- [GitHub Repository](https://github.com/franlol/opencode-md-table-formatter)
-- [npm Package](https://www.npmjs.com/package/@franlol/opencode-md-table-formatter)
-- [Report Issues](https://github.com/franlol/opencode-md-table-formatter/issues)
+- [GitHub Repository](https://github.com/iMythms/opencode-md-table-formatter)
+- [npm Package](https://www.npmjs.com/package/@imythms/opencode-md-table-formatter)
+- [Report Issues](https://github.com/iMythms/opencode-md-table-formatter/issues)
+- [Original Project](https://github.com/franlol/opencode-md-table-formatter)
